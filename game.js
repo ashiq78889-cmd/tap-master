@@ -23,32 +23,16 @@ levelEl.textContent = level;
 bestEl.textContent = best;
 
 function moveTarget() {
-  const maxX = arena.clientWidth - target.offsetWidth;
-  const maxY = arena.clientHeight - target.offsetHeight;
+  const maxX = Math.max(0, arena.clientWidth - target.offsetWidth);
+  const maxY = Math.max(0, arena.clientHeight - target.offsetHeight);
 
-  const x = Math.random() * maxX;
-  const y = Math.random() * maxY;
-
-  target.style.left = `${x}px`;
-  target.style.top = `${y}px`;
-}
-
-function updateProgress() {
-  const needed = level * 10;
-  const progress = Math.min((score / needed) * 100, 100);
-
-  progressBar.style.width = `${progress}%`;
-
-  if (score >= needed) {
-    level++;
-    localStorage.setItem("tapMasterLevel", level);
-    levelEl.textContent = level;
-
-    messageEl.textContent = `⭐ Level ${level} reached!`;
-  }
+  target.style.left = Math.random() * maxX + "px";
+  target.style.top = Math.random() * maxY + "px";
 }
 
 function startGame() {
+  clearInterval(timer);
+
   score = 0;
   time = 30;
   playing = true;
@@ -63,9 +47,7 @@ function startGame() {
 
   moveTarget();
 
-  clearInterval(timer);
-
-  timer = setInterval(() => {
+  timer = setInterval(function () {
     time--;
     timeEl.textContent = time;
 
@@ -88,11 +70,10 @@ function endGame() {
     bestEl.textContent = best;
   }
 
-  messageEl.textContent =
-    `🏁 Game Over! Score: ${score} | 🪙 Coins: ${coins}`;
+  messageEl.textContent = "🏁 Game Over! Score: " + score;
 }
 
-target.addEventListener("click", () => {
+target.addEventListener("click", function () {
   if (!playing) return;
 
   score++;
@@ -103,7 +84,17 @@ target.addEventListener("click", () => {
 
   localStorage.setItem("tapMasterCoins", coins);
 
-  updateProgress();
+  const needed = level * 10;
+  const progress = Math.min((score / needed) * 100, 100);
+  progressBar.style.width = progress + "%";
+
+  if (score >= needed) {
+    level++;
+    localStorage.setItem("tapMasterLevel", level);
+    levelEl.textContent = level;
+    messageEl.textContent = "⭐ Level " + level + "!";
+  }
+
   moveTarget();
 });
 
