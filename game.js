@@ -1,17 +1,25 @@
 const scoreEl = document.getElementById("score");
 const timeEl = document.getElementById("time");
 const bestEl = document.getElementById("best");
+const coinsEl = document.getElementById("coins");
+const levelEl = document.getElementById("level");
 const messageEl = document.getElementById("message");
+const progressBar = document.getElementById("progressBar");
 const arena = document.getElementById("arena");
 const target = document.getElementById("target");
 const startBtn = document.getElementById("start");
 
 let score = 0;
 let time = 30;
+let coins = Number(localStorage.getItem("tapMasterCoins")) || 0;
+let level = Number(localStorage.getItem("tapMasterLevel")) || 1;
+let best = Number(localStorage.getItem("tapMasterBest")) || 0;
+
 let timer = null;
 let playing = false;
 
-let best = Number(localStorage.getItem("tapMasterBest")) || 0;
+coinsEl.textContent = coins;
+levelEl.textContent = level;
 bestEl.textContent = best;
 
 function moveTarget() {
@@ -25,6 +33,21 @@ function moveTarget() {
   target.style.top = `${y}px`;
 }
 
+function updateProgress() {
+  const needed = level * 10;
+  const progress = Math.min((score / needed) * 100, 100);
+
+  progressBar.style.width = `${progress}%`;
+
+  if (score >= needed) {
+    level++;
+    localStorage.setItem("tapMasterLevel", level);
+    levelEl.textContent = level;
+
+    messageEl.textContent = `⭐ Level ${level} reached!`;
+  }
+}
+
 function startGame() {
   score = 0;
   time = 30;
@@ -32,7 +55,9 @@ function startGame() {
 
   scoreEl.textContent = score;
   timeEl.textContent = time;
-  messageEl.textContent = "Tap the target as fast as you can!";
+  messageEl.textContent = "🎯 Tap the target!";
+  progressBar.style.width = "0%";
+
   startBtn.disabled = true;
   target.style.display = "block";
 
@@ -61,18 +86,24 @@ function endGame() {
     best = score;
     localStorage.setItem("tapMasterBest", best);
     bestEl.textContent = best;
-    messageEl.textContent = `🎉 New Best Score: ${score}!`;
-  } else {
-    messageEl.textContent = `Game Over! Your score: ${score}`;
   }
+
+  messageEl.textContent =
+    `🏁 Game Over! Score: ${score} | 🪙 Coins: ${coins}`;
 }
 
 target.addEventListener("click", () => {
   if (!playing) return;
 
   score++;
-  scoreEl.textContent = score;
+  coins++;
 
+  scoreEl.textContent = score;
+  coinsEl.textContent = coins;
+
+  localStorage.setItem("tapMasterCoins", coins);
+
+  updateProgress();
   moveTarget();
 });
 
